@@ -1,0 +1,75 @@
+### BEGIN INIT INFO
+# Provides:          gimme service
+# Required-Start:    $remote_fs $syslog
+# Required-Stop:     $remote_fs $syslog
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: Start daemon at boot time
+# Description:       Enable service provided by daemon.
+### END INIT INFO
+
+start () {
+    echo -n "Starting Gimme service..."
+
+    # Start daemon
+    daemon --chdir='/home/gimme' --command "java -jar minimal-one.jar" --respawn --output=/home/gimme/gimme.log --name=d_gimme --verbose
+
+    RETVAL=$?
+    if [ $RETVAL = 0 ]
+    then
+        echo "done."
+    else
+        echo "failed. See error code for more information."
+    fi
+    return $RETVAL
+}
+
+stop () {
+    # Stop daemon
+    echo -n "Stopping d_gimme..."
+
+    daemon --stop --name=d_gimme  --verbose
+    RETVAL=$?
+
+    if [ $RETVAL = 0 ]
+    then
+        echo "Done."
+    else
+        echo "Failed. See error code for more information."
+    fi
+    return $RETVAL
+}
+
+
+restart () {
+    daemon --restart --name=d_gimme  --verbose
+}
+
+
+status () {
+    # Report on the status of the daemon
+    daemon --running --verbose --name=d_gimme
+    return $?
+}
+
+
+case "$1" in
+    start)
+        start
+    ;;
+    status)
+        status
+    ;;
+    stop)
+        stop
+    ;;
+    restart)
+        restart
+    ;;
+    *)
+        echo $"Usage: d_gimme {start|status|stop|restart}"
+        exit 3
+    ;;
+esac
+
+exit $RETVAL
